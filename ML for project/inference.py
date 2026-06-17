@@ -13,6 +13,7 @@ import requests
 
 import joblib
 import numpy as np
+import gdown  # 🚀 تم إضافة المكتبة هنا
 
 from data_prep import clean_text
 
@@ -31,8 +32,27 @@ class FakeNewsClassifier:
         model_path = model_path or os.path.join(MODELS_DIR, "best_model.pkl")
         vectorizer_path = vectorizer_path or os.path.join(MODELS_DIR, "tfidf_vectorizer.pkl")
 
+        # 🚀 --- بداية كود التحميل من جوجل درايف --- 🚀
+        rf_model_id = '1g5EFhXxi6FyZ2Eu_tTaNw873dN1muzXb'
+        # ⚠️ ماتنساش تحط الـ ID بتاع ملف الـ Vectorizer هنا بدل الكلمة دي:
+        tfidf_id = '1EVG1UHQAm5hAWklKQMLD4WwQgfZ1XsuN'
+
+        def download_from_drive(file_id, output_path):
+            if not os.path.exists(output_path):
+                logger.info(f"Downloading {output_path} from Google Drive...")
+                # السطر ده بيعمل فولدر Models أوتوماتيك لو مش موجود على السيرفر
+                os.makedirs(os.path.dirname(output_path), exist_ok=True)
+                url = f'https://drive.google.com/uc?id={file_id}'
+                gdown.download(url, output_path, quiet=False)
+                logger.info(f"Download complete for {output_path}!")
+
+        # تنفيذ التحميل
+        download_from_drive(rf_model_id, model_path)
+        download_from_drive(tfidf_id, vectorizer_path)
+        # 🚀 --- نهاية كود التحميل --- 🚀
+
         if not os.path.exists(model_path) or not os.path.exists(vectorizer_path):
-            raise FileNotFoundError("Model or vectorizer not found.")
+            raise FileNotFoundError("Model or vectorizer not found even after download attempt.")
 
         self.model = joblib.load(model_path)
         self.vectorizer = joblib.load(vectorizer_path)
@@ -86,7 +106,6 @@ class FakeNewsClassifier:
 # Explanation Engine (LLM / Groq Cloud)
 # --------------------------------------------------------------------------- #
 class LlamaExplainer:
-    # 🚀 التعديل تم هنا: غيرنا الموديل للنسخة الجديدة
     def __init__(self, model: str = "llama-3.1-8b-instant"):
         self.model = model
         self.api_key = os.environ.get("GROQ_API_KEY")
@@ -129,7 +148,8 @@ Keep the tone neutral, informative, and avoid being alarmist."""
     def _call_groq_api(self, prompt: str) -> str:
         if not self.api_key:
             logger.warning("GROQ_API_KEY is not set! Falling back to basic explanation.")
-            return self._fallback_explanation(ml_result)
+            # ⚠️ كان في Error صغير في السطر ده صلحتهولك (كان ml_result مش متعرف هنا)
+            raise ValueError("API Key missing")
 
         headers = {
             "Content-Type": "application/json",
@@ -165,7 +185,6 @@ Keep the tone neutral, informative, and avoid being alarmist."""
 # Unified Pipeline (Backend Entry Point)
 # --------------------------------------------------------------------------- #
 class FakeNewsPipeline:
-    # 🚀 التعديل تم هنا كمان
     def __init__(self, llama_model: str = "llama-3.1-8b-instant"):
         self.classifier = FakeNewsClassifier()
         self.explainer = LlamaExplainer(model=llama_model)
