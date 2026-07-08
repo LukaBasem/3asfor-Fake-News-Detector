@@ -1,7 +1,11 @@
 # 🐦 Asfor (عصفور) - AI-Powered Fake News Detection System
 
 <p align="center">
-  <img src="assets/icon.png" alt="Asfor Logo" width="200" style="border-radius: 50%;"/>
+  <img src="assets/asfor_full_logo.png" alt="Asfor Full Logo" width="600" />
+</p>
+
+<p align="center">
+  <img src="assets/icon.png" alt="Asfor Icon" width="120" style="border-radius: 50%;"/>
 </p>
 
 <p align="center">
